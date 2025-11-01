@@ -19,9 +19,13 @@ async function getTwitterUserData(username) {
     try {
         const bearerToken = process.env.TWITTER_BEARER_TOKEN;
         
-        if (!bearerToken) {
-            throw new Error('Twitter Bearer Token not configured');
+        if (!bearerToken || bearerToken === '') {
+            throw new Error('Twitter Bearer Token not configured in environment variables');
         }
+
+        console.log('Attempting to fetch Twitter data for:', username);
+        console.log('Bearer token exists:', !!bearerToken);
+        console.log('Token length:', bearerToken?.length);
 
         // Get user by username
         const userResponse = await axios.get(
@@ -40,6 +44,8 @@ async function getTwitterUserData(username) {
         const user = userResponse.data.data;
         const userId = user.id;
 
+        console.log('User data fetched successfully for:', username);
+
         // Get user's recent tweets
         const tweetsResponse = await axios.get(
             `${TWITTER_API_BASE}/users/${userId}/tweets`,
@@ -56,11 +62,18 @@ async function getTwitterUserData(username) {
             }
         );
 
+        console.log('Tweets fetched successfully');
+
         return {
             user,
             tweets: tweetsResponse.data.data || []
         };
     } catch (error) {
+        console.error('Twitter API Error Details:');
+        console.error('Status:', error.response?.status);
+        console.error('Error message:', error.message);
+        console.error('Response data:', error.response?.data);
+        
         if (error.response?.status === 429) {
             const resetTime = error.response.headers['x-rate-limit-reset'];
             const resetDate = resetTime ? new Date(resetTime * 1000) : null;
@@ -68,12 +81,17 @@ async function getTwitterUserData(username) {
             
             throw {
                 status: 429,
-                message: `Rate limit exceeded. Please try again in ${waitMinutes} minutes.`,
+                message: `Twitter API rate limit exceeded. Please try again in ${waitMinutes} minutes.`,
                 resetTime: resetDate
             };
         }
-        console.error('Twitter API Error:', error.response?.data || error.message);
-        throw error;
+        
+        // Return more detailed error
+        throw {
+            status: error.response?.status || 500,
+            message: error.response?.data?.detail || error.response?.data?.title || error.message,
+            details: error.response?.data
+        };
     }
 }
 
@@ -226,6 +244,8 @@ app.get('/api/analyze/:username', async (req, res) => {
             try {
                 userData = await getTwitterUserData(username);
             } catch (error) {
+                console.error('API Error caught:', error);
+                
                 if (error.status === 429) {
                     return res.status(429).json({
                         success: false,
@@ -234,11 +254,13 @@ app.get('/api/analyze/:username', async (req, res) => {
                         suggestion: 'Try demo mode to see how the tool works'
                     });
                 }
-                // Return error instead of silently using demo data
-                return res.status(500).json({
+                
+                // Return detailed error for debugging
+                return res.status(error.status || 500).json({
                     success: false,
-                    error: 'Unable to fetch real Twitter data. Please try Demo Mode instead.',
-                    suggestion: 'Click the "Try Demo" button to see sample analytics'
+                    error: error.message || 'Unable to fetch Twitter data',
+                    details: error.details,
+                    suggestion: 'Click "Try Demo" button to see sample analytics. The Twitter API might have rate limits or authentication issues.'
                 });
             }
         } else {
