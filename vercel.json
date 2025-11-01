@@ -1,4 +1,5 @@
 {
+  "name": "x-twitter-analytics",
   "version": 2,
   "builds": [
     {
