@@ -234,10 +234,12 @@ app.get('/api/analyze/:username', async (req, res) => {
                         suggestion: 'Try demo mode to see how the tool works'
                     });
                 }
-                // On other errors, use demo data
-                console.log('Using demo data due to error:', error.message);
-                userData = getDemoUserData(username);
-                isDemo = true;
+                // Return error instead of silently using demo data
+                return res.status(500).json({
+                    success: false,
+                    error: 'Unable to fetch real Twitter data. Please try Demo Mode instead.',
+                    suggestion: 'Click the "Try Demo" button to see sample analytics'
+                });
             }
         } else {
             userData = getDemoUserData(username);
