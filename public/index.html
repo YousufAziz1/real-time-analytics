@@ -694,11 +694,10 @@
         <div class="search-box">
             <div class="input-group">
                 <input type="text" id="usernameInput" placeholder="Enter X (Twitter) username (e.g., elonmusk)" />
-                <button id="analyzeBtn" onclick="analyzeUser(false)">Analyze</button>
-                <button id="demoBtn" onclick="analyzeUser(true)" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">Try Demo</button>
+                <button id="demoBtn" onclick="analyzeUser(true)" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">Analyze (Demo)</button>
             </div>
             <div class="note-box">
-                <strong>💡 Quick Start:</strong> Click <strong>"Try Demo"</strong> to see how the tool works with sample data, or enter any X (Twitter) username and click <strong>"Analyze"</strong> for real-time analytics!
+                <strong>💡 Try It Now:</strong> Enter any username and click <strong>"Analyze (Demo)"</strong> to see detailed analytics with sample data!
             </div>
             <div class="error-message" id="errorMessage"></div>
             <div class="loading" id="loading">
@@ -776,7 +775,6 @@
             document.getElementById('results').style.display = 'none';
             document.getElementById('errorMessage').style.display = 'none';
             document.getElementById('loading').style.display = 'block';
-            document.getElementById('analyzeBtn').disabled = true;
             document.getElementById('demoBtn').disabled = true;
 
             try {
@@ -803,7 +801,6 @@ ${data.suggestion || 'Try demo mode instead!'}`);
                 showError(error.message);
             } finally {
                 document.getElementById('loading').style.display = 'none';
-                document.getElementById('analyzeBtn').disabled = false;
                 document.getElementById('demoBtn').disabled = false;
             }
         }

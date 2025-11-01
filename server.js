@@ -97,38 +97,53 @@ async function getTwitterUserData(username) {
 
 // Generate demo data for demonstration
 function getDemoUserData(username) {
-    const demoUsers = {
-        default: {
-            user: {
-                id: '12345',
-                username: username,
-                name: 'Demo User',
-                created_at: '2020-01-15T08:00:00.000Z',
-                description: '🚀 Content Creator | Tech Enthusiast | Building in Public',
-                verified: false,
-                profile_image_url: 'https://abs.twimg.com/sticky/default_profile_images/default_profile_400x400.png',
-                public_metrics: {
-                    followers_count: 5420,
-                    following_count: 892,
-                    tweet_count: 2847,
-                    listed_count: 43
-                }
-            },
-            tweets: Array.from({ length: 30 }, (_, i) => ({
+    // Generate realistic demo data based on username
+    const followerCount = 3000 + (username.length * 347);
+    const followingCount = 500 + (username.length * 52);
+    const tweetCount = 1500 + (username.length * 124);
+    
+    return {
+        user: {
+            id: '12345' + username.length,
+            username: username,
+            name: username.charAt(0).toUpperCase() + username.slice(1),
+            created_at: new Date(Date.now() - (365 * 2 * 24 * 60 * 60 * 1000)).toISOString(), // 2 years ago
+            description: `🚀 Content Creator | ${username.charAt(0).toUpperCase() + username.slice(1)} | Tech Enthusiast | Building in Public`,
+            verified: followerCount > 5000,
+            profile_image_url: 'https://abs.twimg.com/sticky/default_profile_images/default_profile_400x400.png',
+            public_metrics: {
+                followers_count: followerCount,
+                following_count: followingCount,
+                tweet_count: tweetCount,
+                listed_count: Math.floor(followerCount / 100)
+            }
+        },
+        tweets: Array.from({ length: 30 }, (_, i) => {
+            const baseEngagement = Math.floor(followerCount * 0.02);
+            return {
                 id: `tweet${i}`,
-                text: `This is a demo tweet #${i + 1}. Great content about tech and innovation! 🚀`,
-                created_at: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString(),
+                text: [
+                    `Just shipped a new feature! 🚀 Building in public is the best way to grow. #buildinpublic`,
+                    `Hot take: The best time to start is now. Stop overthinking, start building! 💪`,
+                    `Shared my journey on X. From 0 to ${followerCount.toLocaleString()} followers in 2 years. Here's what I learned... 🧵`,
+                    `New blog post: How I grew my audience on X 📈 Link in bio!`,
+                    `Grateful for this amazing community! Thank you all for the support ❤️`,
+                    `Pro tip: Consistency > Perfection. Keep showing up every single day! 💯`,
+                    `Working on something exciting. Can't wait to share it with you all! ✨`,
+                    `The algorithm favors engagement. Reply to comments, interact with your audience! 💬`,
+                    `Just hit a major milestone! Couldn't have done it without you all 🙏`,
+                    `Monday motivation: Your network is your net worth. Keep building! 🌟`
+                ][i % 10],
+                created_at: new Date(Date.now() - (i * 24 * 60 * 60 * 1000)).toISOString(),
                 public_metrics: {
-                    like_count: Math.floor(Math.random() * 200) + 50,
-                    retweet_count: Math.floor(Math.random() * 50) + 10,
-                    reply_count: Math.floor(Math.random() * 30) + 5,
-                    impression_count: Math.floor(Math.random() * 5000) + 1000
+                    like_count: Math.floor(baseEngagement + (Math.random() * baseEngagement)),
+                    retweet_count: Math.floor(baseEngagement * 0.3 + (Math.random() * baseEngagement * 0.3)),
+                    reply_count: Math.floor(baseEngagement * 0.2 + (Math.random() * baseEngagement * 0.2)),
+                    impression_count: Math.floor(followerCount * 2 + (Math.random() * followerCount * 3))
                 }
-            }))
-        }
+            };
+        })
     };
-
-    return demoUsers.default;
 }
 
 // Calculate income and projections
